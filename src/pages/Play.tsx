@@ -23,7 +23,7 @@ const Play: React.FC = () => {
 
   // 共通の終了処理
   const finishSession = (finalCount: number) => {
-    navigate('/speech-training/result', { state: { count: finalCount, level: selectedLevel } });
+    navigate('/result', { state: { count: finalCount, level: selectedLevel } });
   };
 
   // 読み上げ用の関数

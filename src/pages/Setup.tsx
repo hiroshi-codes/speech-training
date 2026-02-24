@@ -25,7 +25,7 @@ const Setup: React.FC = () => {
         {levels.map((lvl) => (
           <button
             key={lvl.id}
-            onClick={() => navigate('/speech-training/play', { state: { selectedLevel: lvl.id } })}
+            onClick={() => navigate('/play', { state: { selectedLevel: lvl.id } })}
             className={`flex items-center p-4 ${lvl.color} text-white rounded-2xl ${lvl.shadow} active:translate-y-1 active:shadow-none transition-all`}
           >
             <div className="bg-white/20 rounded-lg p-2 mr-4 font-black text-xl min-w-10">
@@ -40,7 +40,7 @@ const Setup: React.FC = () => {
       </div>
 
       <button 
-        onClick={() => navigate('/speech-training/')}
+        onClick={() => navigate('/')}
         className="mt-10 block mx-auto text-slate-400 font-bold hover:text-slate-600"
       >
         ← もどる

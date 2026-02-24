@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Setup from './pages/Setup';
 import Play from './pages/Play';
@@ -19,10 +19,6 @@ const App: React.FC = () => {
             <Route path="/setup" element={<Setup />} />
             <Route path="/play" element={<Play />} />
             <Route path="/result" element={<Result />} />
-            <Route path="/speech-training/" element={<Home />} />
-            <Route path="/speech-training/setup" element={<Setup />} />
-            <Route path="/speech-training/play" element={<Play />} />
-            <Route path="/speech-training/result" element={<Result />} />
           </Routes>
         </main>
       </div>

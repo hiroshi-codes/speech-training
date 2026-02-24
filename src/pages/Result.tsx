@@ -59,14 +59,14 @@ const Result: React.FC = () => {
       {/* アクションボタン */}
       <div className="w-full max-w-xs space-y-4">
         <button
-          onClick={() => navigate('/speech-training/play', { state: { selectedLevel: level } })}
+          onClick={() => navigate('/play', { state: { selectedLevel: level } })}
           className="w-full py-5 bg-orange-400 text-white rounded-3xl text-2xl font-black shadow-[0_8px_0_rgb(234,88,12)] active:translate-y-1 active:shadow-[0_4px_0_rgb(234,88,12)] transition-all"
         >
           もう一回！
         </button>
 
         <button
-          onClick={() => navigate('/speech-training/')}
+          onClick={() => navigate('/')}
           className="w-full py-3 bg-white text-blue-500 border-2 border-blue-200 rounded-2xl font-bold hover:bg-blue-50"
         >
           ホームへもどる
