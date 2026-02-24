@@ -26,6 +26,25 @@ const Play: React.FC = () => {
     navigate('/speech-training/result', { state: { count: finalCount, level: selectedLevel } });
   };
 
+  // 読み上げ用の関数
+  const speak = (text: string) => {
+    // ブラウザが対応しているか確認
+    if (!('speechSynthesis' in window)) {
+      alert('このブラウザは音声読み上げに対応していません');
+      return;
+    }
+
+    // 実行中の読み上げがあればキャンセル
+    window.speechSynthesis.cancel();
+
+    const uttr = new SpeechSynthesisUtterance(text);
+    uttr.lang = 'ja-JP'; // 日本語
+    uttr.rate = 1.0;     // 速度（0.1〜10）
+    uttr.pitch = 1.0;    // 声の高さ（0〜2）
+
+    window.speechSynthesis.speak(uttr);
+  };
+
   const handleNext = () => {
     // 10問目（MAX-1）に達したか、全データの上限なら終了
     if (currentIndex < MAX_QUESTIONS - 1 && currentIndex < filteredTopics.length - 1) {
@@ -56,6 +75,14 @@ const Play: React.FC = () => {
         <p className="text-3xl font-black text-slate-700 text-center leading-relaxed">
           {filteredTopics[currentIndex]?.text}
         </p>
+        {/* 読み上げボタン */}
+        <button
+          onClick={() => speak(filteredTopics[currentIndex]?.text)}
+          className="absolute -bottom-1 right-1 w-14 h-14 bg-yellow-400 rounded-full shadow-lg flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform"
+          title="よみあげ"
+        >
+          🔊
+        </button>
       </div>
 
       {/* 3. 操作ボタン */}
