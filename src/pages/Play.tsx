@@ -7,47 +7,64 @@ const Play: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedLevel = location.state?.selectedLevel ?? 0;
-
-  // 1セットの最大問題数
   const MAX_QUESTIONS = 10;
 
-  // データの準備（フィルタリングとシャッフル）
+  // --- お題のリスト作成ロジック ---
   const filteredTopics = useMemo(() => {
-    const rawData = selectedLevel === 0
-      ? (topicData.topics as Topic[])
-      : (topicData.topics as Topic[]).filter((t) => t.level === selectedLevel);
-    return [...rawData].sort(() => Math.random() - 0.5);
-  }, [selectedLevel]);
+    // 1. そのレベルの全お題を取得
+    const allTopics = (topicData.topics as Topic[]).filter((t) => 
+      selectedLevel === 0 ? true : t.level === selectedLevel
+    );
+    const allIds = allTopics.map(t => t.id);
+
+    // 2. localStorage から今の山札（キュー）を取得
+    const queueKey = `queue_level_${selectedLevel}`;
+    let currentQueue: number[] = JSON.parse(localStorage.getItem(queueKey) || '[]');
+
+    // 3. 山札が足りない場合は、新しい周回分をシャッフルして追加
+    if (currentQueue.length < MAX_QUESTIONS) {
+      const nextRound = [...allIds].sort(() => Math.random() - 0.5);
+      currentQueue = [...currentQueue, ...nextRound];
+    }
+
+    // 4. 先頭から10問を「今回の出題」として取り出す
+    const sessionIds = currentQueue.slice(0, MAX_QUESTIONS);
+    
+    // 5. 【重要】残りの山札をすぐに保存する
+    // これにより、途中でブラウザを閉じても「使った分」は次に出ません
+    const remainingQueue = currentQueue.slice(MAX_QUESTIONS);
+    localStorage.setItem(queueKey, JSON.stringify(remainingQueue));
+
+    // IDからお題データに復元
+    return sessionIds.map(id => allTopics.find(t => t.id === id)!).filter(Boolean);
+    // location.key を監視対象にすることで「もう一度」で再計算される
+  }, [selectedLevel, location.key]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // 共通の終了処理
+  // --- 終了処理 ---
   const finishSession = (finalCount: number) => {
-    navigate('/result', { state: { count: finalCount, level: selectedLevel } });
+    // すでに filteredTopics 作成時にキューは更新済みなので、
+    // ここではリザルト画面へ遷移するだけでOK！
+    navigate('/result', { 
+      state: { 
+        count: finalCount,
+        level: selectedLevel 
+      } 
+    });
   };
 
-  // 読み上げ用の関数
+  // --- 読み上げ ---
   const speak = (text: string) => {
-    // ブラウザが対応しているか確認
-    if (!('speechSynthesis' in window)) {
-      alert('このブラウザは音声読み上げに対応していません');
-      return;
-    }
-
-    // 実行中の読み上げがあればキャンセル
+    if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-
     const uttr = new SpeechSynthesisUtterance(text);
-    uttr.lang = 'ja-JP'; // 日本語
-    uttr.rate = 1.0;     // 速度（0.1〜10）
-    uttr.pitch = 1.0;    // 声の高さ（0〜2）
-
+    uttr.lang = 'ja-JP';
     window.speechSynthesis.speak(uttr);
   };
 
   const handleNext = () => {
-    // 10問目（MAX-1）に達したか、全データの上限なら終了
-    if (currentIndex < MAX_QUESTIONS - 1 && currentIndex < filteredTopics.length - 1) {
+    if (currentIndex < filteredTopics.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else {
       finishSession(currentIndex + 1);
@@ -71,15 +88,13 @@ const Play: React.FC = () => {
       </div>
 
       {/* 2. お題カード */}
-      <div className="relative bg-white w-full p-8 rounded-[2.5rem] shadow-xl border-4 border-blue-50 flex items-center justify-center min-h-62.5 mb-10">
+      <div className="relative bg-white w-full p-8 rounded-[2.5rem] shadow-xl border-4 border-blue-50 flex items-center justify-center min-h-60 mb-10">
         <p className="text-3xl font-black text-slate-700 text-center leading-relaxed">
           {filteredTopics[currentIndex]?.text}
         </p>
-        {/* 読み上げボタン */}
         <button
           onClick={() => speak(filteredTopics[currentIndex]?.text)}
           className="absolute -bottom-1 right-1 w-14 h-14 bg-yellow-400 rounded-full shadow-lg flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform"
-          title="よみあげ"
         >
           🔊
         </button>
