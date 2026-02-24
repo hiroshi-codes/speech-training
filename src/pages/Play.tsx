@@ -11,47 +11,45 @@ const Play: React.FC = () => {
 
   // --- お題のリスト作成ロジック ---
   const filteredTopics = useMemo(() => {
-    // 1. そのレベルの全お題を取得
-    const allTopics = (topicData.topics as Topic[]).filter((t) => 
+    const allTopics = (topicData.topics as Topic[]).filter((t) =>
       selectedLevel === 0 ? true : t.level === selectedLevel
     );
-    const allIds = allTopics.map(t => t.id);
 
-    // 2. localStorage から今の山札（キュー）を取得
+    // 山札（これから出すリスト）
     const queueKey = `queue_level_${selectedLevel}`;
     let currentQueue: number[] = JSON.parse(localStorage.getItem(queueKey) || '[]');
 
-    // 3. 山札が足りない場合は、新しい周回分をシャッフルして追加
-    if (currentQueue.length < MAX_QUESTIONS) {
-      const nextRound = [...allIds].sort(() => Math.random() - 0.5);
-      currentQueue = [...currentQueue, ...nextRound];
+    // 山札が空なら全IDを補充
+    if (currentQueue.length === 0) {
+      currentQueue = allTopics.map(t => t.id).sort(() => Math.random() - 0.5);
+      localStorage.setItem(queueKey, JSON.stringify(currentQueue));
     }
 
-    // 4. 先頭から10問を「今回の出題」として取り出す
+    // 先頭10問を表示用に取り出す（ここではまだ保存しない）
     const sessionIds = currentQueue.slice(0, MAX_QUESTIONS);
-    
-    // 5. 【重要】残りの山札をすぐに保存する
-    // これにより、途中でブラウザを閉じても「使った分」は次に出ません
-    const remainingQueue = currentQueue.slice(MAX_QUESTIONS);
-    localStorage.setItem(queueKey, JSON.stringify(remainingQueue));
-
-    // IDからお題データに復元
     return sessionIds.map(id => allTopics.find(t => t.id === id)!).filter(Boolean);
-    // location.key を監視対象にすることで「もう一度」で再計算される
   }, [selectedLevel, location.key]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // --- 終了処理 ---
+  // --- 終了時に「実際に答えた分」を山札から消す ---
   const finishSession = (finalCount: number) => {
-    // すでに filteredTopics 作成時にキューは更新済みなので、
-    // ここではリザルト画面へ遷移するだけでOK！
-    navigate('/result', { 
-      state: { 
-        count: finalCount,
-        level: selectedLevel 
-      } 
-    });
+    const queueKey = `queue_level_${selectedLevel}`;
+    const clearCountKey = `clear_count_level_${selectedLevel}`;
+
+    const currentQueue: number[] = JSON.parse(localStorage.getItem(queueKey) || '[]');
+    const updatedQueue = currentQueue.slice(finalCount);
+
+    // キューを更新
+    localStorage.setItem(queueKey, JSON.stringify(updatedQueue));
+
+    // ★ ここでクリア回数のカウントアップ
+    if (updatedQueue.length === 0) {
+      const currentClears = Number(localStorage.getItem(clearCountKey) || '0');
+      localStorage.setItem(clearCountKey, String(currentClears + 1));
+    }
+
+    navigate('/result', { state: { count: finalCount, level: selectedLevel } });
   };
 
   // --- 読み上げ ---
