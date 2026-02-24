@@ -17,16 +17,18 @@ const Setup: React.FC = () => {
     const clearKey = `clear_count_level_${level}`;
 
     const queueRaw = localStorage.getItem(queueKey);
-    const queue: number[] = JSON.parse(queueRaw || '[]');
-    // クリア回数を取得
     const clears = Number(localStorage.getItem(clearKey) || '0');
 
     let remaining = total;
+
     if (queueRaw !== null) {
+      const queue: number[] = JSON.parse(queueRaw);
       remaining = queue.length;
+    } else if (clears > 0) {
+      // 1回以上クリアしていて、かつキューがnull（リセット後など）なら一旦0とする
+      remaining = 0;
     }
 
-    // 1周終わって次の周回がまだ始まっていない状態、または全て解いた後
     const completed = total - remaining;
 
     return { total, completed, remaining, clears };
