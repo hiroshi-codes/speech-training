@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/speech-training/',
+  base: './',
   plugins: [react(), tailwindcss(), VitePWA({
     registerType: 'prompt',
     injectRegister: false,
