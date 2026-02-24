@@ -1,0 +1,32 @@
+/* Google Fonts から丸文字を読み込み */
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap');
+
+@import "tailwindcss";
+
+:root {
+  /* アプリ全体のフォントを丸文字に設定 */
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* デフォルトの文字色を少し柔らかい黒(slate-700)にする */
+  color: #334155;
+  /* 背景を温かみのある白(amber-50)にする */
+  background-color: #fffbeb;
+  
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  /* Viteデフォルトの display: flexなどは削除 */
+}
+
+/* ボタンなどのデフォルトの枠線を消してTailwindで制御しやすくする */
+button {
+  font-family: inherit;
+}
