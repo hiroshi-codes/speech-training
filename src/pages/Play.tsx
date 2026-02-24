@@ -1,92 +1,77 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import topicData from '../data/topics.json'; // パスは適宜調整してください
+import topicData from '../data/topics.json';
 import { type Topic } from '../types/topic';
 
 const Play: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // 0 は「全レベル」を指すと定義
   const selectedLevel = location.state?.selectedLevel ?? 0;
 
+  // 1セットの最大問題数
+  const MAX_QUESTIONS = 10;
+
+  // データの準備（フィルタリングとシャッフル）
   const filteredTopics = useMemo(() => {
-    // 1. レベルが0なら全データ、それ以外ならフィルタリング
-    const rawData = selectedLevel === 0
+    const rawData = selectedLevel === 0 
       ? (topicData.topics as Topic[])
       : (topicData.topics as Topic[]).filter((t) => t.level === selectedLevel);
-
-    // 2. シャッフル
     return [...rawData].sort(() => Math.random() - 0.5);
   }, [selectedLevel]);
 
-  // 現在の問題のインデックスを管理するState
-  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // 読み上げ用の関数
-  const speak = (text: string) => {
-    // ブラウザが対応しているか確認
-    if (!('speechSynthesis' in window)) {
-      alert('このブラウザは音声読み上げに対応していません');
-      return;
-    }
-
-    // 実行中の読み上げがあればキャンセル
-    window.speechSynthesis.cancel();
-
-    const uttr = new SpeechSynthesisUtterance(text);
-    uttr.lang = 'ja-JP'; // 日本語
-    uttr.rate = 1.0;     // 速度（0.1〜10）
-    uttr.pitch = 1.0;    // 声の高さ（0〜2）
-
-    window.speechSynthesis.speak(uttr);
+  // 共通の終了処理
+  const finishSession = (finalCount: number) => {
+    navigate('/speech-training/result', { state: { count: finalCount } });
   };
 
   const handleNext = () => {
-    if (currentIndex < filteredTopics.length - 1) {
+    // 10問目（MAX-1）に達したか、全データの上限なら終了
+    if (currentIndex < MAX_QUESTIONS - 1 && currentIndex < filteredTopics.length - 1) {
       setCurrentIndex(prev => prev + 1);
-      // 次の問題に行った時に自動で読み上げたい場合はここで呼ぶ
-      // ※ただし、一度ユーザーが画面のどこかをクリックしている必要があります
-      // speak(filteredTopics[currentIndex + 1].text);
     } else {
-      navigate('/');
+      finishSession(currentIndex + 1);
     }
   };
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
-      <div className="text-center mb-4 text-gray-500 font-bold">
-        {selectedLevel === 0 ? "ぜんぶ混ぜて練習中" : `レベル ${selectedLevel} の練習中`}
-        <div className="text-sm">（{currentIndex + 1} / {filteredTopics.length}問目）</div>
+    <div className="flex flex-col items-center p-6 w-full max-w-md mx-auto">
+      {/* 1. 進捗ゲージ */}
+      <div className="w-full mb-8">
+        <div className="flex justify-between text-sm font-bold text-slate-500 mb-2">
+          <span>あと {MAX_QUESTIONS - currentIndex} もん</span>
+          <span>{currentIndex + 1} / {MAX_QUESTIONS}</span>
+        </div>
+        <div className="w-full bg-slate-200 h-4 rounded-full overflow-hidden shadow-inner">
+          <div 
+            className="bg-green-400 h-full transition-all duration-500 ease-out"
+            style={{ width: `${((currentIndex + 1) / MAX_QUESTIONS) * 100}%` }}
+          ></div>
+        </div>
       </div>
 
-      <div className="relative bg-white p-10 rounded-[3rem] shadow-xl border-4 border-blue-100 min-h-62.5 w-full flex items-center justify-center mb-6">
+      {/* 2. お題カード（以前のデザインを流用） */}
+      <div className="relative bg-white w-full p-8 rounded-[2.5rem] shadow-xl border-4 border-blue-50 flex items-center justify-center min-h-[250px] mb-10">
         <p className="text-3xl font-black text-slate-700 text-center leading-relaxed">
           {filteredTopics[currentIndex]?.text}
         </p>
-
-        {/* 読み上げボタン */}
-        <button
-          onClick={() => speak(filteredTopics[currentIndex]?.text)}
-          className="absolute -bottom-1 right-6 w-14 h-14 bg-yellow-400 rounded-full shadow-lg flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform"
-          title="よみあげ"
-        >
-          🔊
-        </button>
       </div>
 
-      <div className="flex justify-center gap-6">
-        <button
-          onClick={() => navigate('/setup')}
-          className="px-8 py-3 bg-gray-200 text-gray-700 rounded-full font-bold shadow-md active:scale-95"
-        >
-          やめる
-        </button>
-        <button
+      {/* 3. 操作ボタン */}
+      <div className="w-full space-y-6">
+        <button 
           onClick={handleNext}
-          className="px-10 py-3 bg-blue-500 text-white rounded-full font-bold shadow-lg hover:bg-blue-600 active:scale-95"
+          className="w-full py-5 bg-blue-500 text-white rounded-3xl text-2xl font-black shadow-[0_8px_0_rgb(37,99,235)] active:translate-y-1 active:shadow-[0_4px_0_rgb(37,99,235)] transition-all"
         >
-          つぎへ
+          つぎへ！
+        </button>
+
+        <button 
+          onClick={() => finishSession(currentIndex + 1)}
+          className="w-full py-3 text-slate-400 font-bold hover:text-slate-600 transition-colors"
+        >
+          ここで おしまいにする
         </button>
       </div>
     </div>

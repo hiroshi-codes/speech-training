@@ -23,7 +23,7 @@ const Home: React.FC = () => {
 
       <div className="w-full max-w-xs">
         <button 
-          onClick={() => navigate('/setup')}
+          onClick={() => navigate('/speech-training/setup')}
           className="w-full py-5 bg-orange-400 text-white rounded-3xl text-2xl font-black shadow-[0_8px_0_rgb(234,88,12)] active:translate-y-1 active:shadow-[0_4px_0_rgb(234,88,12)] transition-all mb-6"
         >
           はじめる！

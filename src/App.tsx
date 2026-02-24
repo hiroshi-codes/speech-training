@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Setup from './pages/Setup';
 import Play from './pages/Play';
+import Result from './pages/Result';
 
 const App: React.FC = () => {
   return (
@@ -17,9 +18,11 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/setup" element={<Setup />} />
             <Route path="/play" element={<Play />} />
+            <Route path="/result" element={<Result />} />
             <Route path="/speech-training/" element={<Home />} />
             <Route path="/speech-training/setup" element={<Setup />} />
             <Route path="/speech-training/play" element={<Play />} />
+            <Route path="/speech-training/result" element={<Result />} />
           </Routes>
         </main>
       </div>
