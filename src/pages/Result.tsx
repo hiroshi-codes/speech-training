@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 
@@ -6,52 +6,72 @@ const Result: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const count = location.state?.count ?? 0;
+  const level = location.state?.level ?? 0; // 前の画面からレベルも渡すと「もう一回」が楽になります
+
+  const [visibleStamps, setVisibleStamps] = useState(0);
 
   useEffect(() => {
-    // 画面に来た瞬間に紙吹雪を飛ばす
-    const duration = 3 * 1000;
-    const end = Date.now() + duration;
+    // 紙吹雪を飛ばす
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#ffbed1', '#ffea00', '#42a5f5', '#66bb6a']
+    });
 
-    const frame = () => {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.8 },
-        colors: ['#ffbed1', '#ffea00', '#42a5f5']
+    // スタンプを一個ずつ表示させるタイマー
+    const timer = setInterval(() => {
+      setVisibleStamps((prev) => {
+        if (prev < count) return prev + 1;
+        clearInterval(timer);
+        return prev;
       });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.8 },
-        colors: ['#ffbed1', '#ffea00', '#42a5f5']
-      });
+    }, 200);
 
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
-  }, []);
+    return () => clearInterval(timer);
+  }, [count]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
-      <div className="text-6xl mb-6">🏆</div>
-      <h2 className="text-4xl font-black text-slate-800 mb-4">
-        すごーい！！
-      </h2>
-      <p className="text-xl font-bold text-slate-600 mb-8">
-        ぜんぶで <span className="text-3xl text-orange-500">{count}</span> もん<br />
-        おはなし できたね！
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-10 bg-amber-50">
+      <div className="text-6xl mb-4 animate-bounce">🏆</div>
+      <h2 className="text-4xl font-black text-slate-800 mb-2">やったね！！</h2>
+      <p className="text-lg font-bold text-slate-600 mb-8">
+        今日は <span className="text-3xl text-orange-500">{count}</span> もん おはなししたよ
       </p>
 
-      <button 
-        onClick={() => navigate('/speech-training/')}
-        className="w-full max-w-xs py-5 bg-blue-500 text-white rounded-3xl text-2xl font-black shadow-[0_8px_0_rgb(37,99,235)] active:translate-y-1 active:shadow-[0_4px_0_rgb(37,99,235)] transition-all"
-      >
-        ホームへもどる
-      </button>
+      {/* ごほうびスタンプエリア */}
+      <div className="bg-white/50 border-4 border-dashed border-orange-200 rounded-3xl p-6 w-full max-w-sm mb-10">
+        <p className="text-sm font-bold text-orange-400 mb-4 text-center">ごほうびスタンプ</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          {[...Array(count)].map((_, i) => (
+            <div
+              key={i}
+              className={`text-4xl transition-all duration-300 transform ${
+                i < visibleStamps ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+              }`}
+            >
+              💮
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* アクションボタン */}
+      <div className="w-full max-w-xs space-y-4">
+        <button
+          onClick={() => navigate('/speech-training/play', { state: { selectedLevel: level } })}
+          className="w-full py-5 bg-orange-400 text-white rounded-3xl text-2xl font-black shadow-[0_8px_0_rgb(234,88,12)] active:translate-y-1 active:shadow-[0_4px_0_rgb(234,88,12)] transition-all"
+        >
+          もう一回！
+        </button>
+
+        <button
+          onClick={() => navigate('/speech-training/')}
+          className="w-full py-3 bg-white text-blue-500 border-2 border-blue-200 rounded-2xl font-bold hover:bg-blue-50"
+        >
+          ホームへもどる
+        </button>
+      </div>
     </div>
   );
 };

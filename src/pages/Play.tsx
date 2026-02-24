@@ -13,7 +13,7 @@ const Play: React.FC = () => {
 
   // データの準備（フィルタリングとシャッフル）
   const filteredTopics = useMemo(() => {
-    const rawData = selectedLevel === 0 
+    const rawData = selectedLevel === 0
       ? (topicData.topics as Topic[])
       : (topicData.topics as Topic[]).filter((t) => t.level === selectedLevel);
     return [...rawData].sort(() => Math.random() - 0.5);
@@ -23,7 +23,7 @@ const Play: React.FC = () => {
 
   // 共通の終了処理
   const finishSession = (finalCount: number) => {
-    navigate('/speech-training/result', { state: { count: finalCount } });
+    navigate('/speech-training/result', { state: { count: finalCount, level: selectedLevel } });
   };
 
   const handleNext = () => {
@@ -44,15 +44,15 @@ const Play: React.FC = () => {
           <span>{currentIndex + 1} / {MAX_QUESTIONS}</span>
         </div>
         <div className="w-full bg-slate-200 h-4 rounded-full overflow-hidden shadow-inner">
-          <div 
+          <div
             className="bg-green-400 h-full transition-all duration-500 ease-out"
             style={{ width: `${((currentIndex + 1) / MAX_QUESTIONS) * 100}%` }}
           ></div>
         </div>
       </div>
 
-      {/* 2. お題カード（以前のデザインを流用） */}
-      <div className="relative bg-white w-full p-8 rounded-[2.5rem] shadow-xl border-4 border-blue-50 flex items-center justify-center min-h-[250px] mb-10">
+      {/* 2. お題カード */}
+      <div className="relative bg-white w-full p-8 rounded-[2.5rem] shadow-xl border-4 border-blue-50 flex items-center justify-center min-h-62.5 mb-10">
         <p className="text-3xl font-black text-slate-700 text-center leading-relaxed">
           {filteredTopics[currentIndex]?.text}
         </p>
@@ -60,14 +60,14 @@ const Play: React.FC = () => {
 
       {/* 3. 操作ボタン */}
       <div className="w-full space-y-6">
-        <button 
+        <button
           onClick={handleNext}
           className="w-full py-5 bg-blue-500 text-white rounded-3xl text-2xl font-black shadow-[0_8px_0_rgb(37,99,235)] active:translate-y-1 active:shadow-[0_4px_0_rgb(37,99,235)] transition-all"
         >
           つぎへ！
         </button>
 
-        <button 
+        <button
           onClick={() => finishSession(currentIndex + 1)}
           className="w-full py-3 text-slate-400 font-bold hover:text-slate-600 transition-colors"
         >
