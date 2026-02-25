@@ -9,24 +9,45 @@
   line-height: 1.5;
   font-weight: 400;
 
-  /* デフォルトの文字色を少し柔らかい黒(slate-700)にする */
   color: #334155;
-  /* 背景を温かみのある白(amber-50)にする */
   background-color: #fffbeb;
   
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* ★ 追加: 画面のスクロールとバウンドを物理的に止める */
+  overflow: hidden;
+  height: 100%;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
-  /* Viteデフォルトの display: flexなどは削除 */
+  /* ★ 修正: 100vh ではなく 100dvh を使用 */
+  height: 100dvh;
+  width: 100%;
+  
+  /* iOSでのプルダウンリフレッシュ（画面を下に引っ張ると更新される挙動）を防止 */
+  position: fixed;
+  overflow: hidden;
+
+  /* 文字の選択を禁止（ボタン連打時の意図しないズームや選択を防ぐ） */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  /* 内部のコンテンツが多い場合にのみ、ここだけでスクロールを許可する設定 */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOSでのスクロールを滑らかに */
 }
 
 /* ボタンなどのデフォルトの枠線を消してTailwindで制御しやすくする */
 button {
   font-family: inherit;
+  /* スマホでのタップ時の青いハイライトを消す */
+  -webkit-tap-highlight-color: transparent;
 }
