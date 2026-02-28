@@ -4,10 +4,12 @@ import Home from './pages/Home';
 import Setup from './pages/Setup';
 import Play from './pages/Play';
 import Result from './pages/Result';
+import PWABadge from './PWABadge';
 
 const App: React.FC = () => {
   return (
     <Router>
+      <PWABadge />
       <div className="min-h-screen bg-yellow-50">
         <header className="p-4 flex justify-end">
           {/* ここに「設定」アイコンなど置く予定 */}
